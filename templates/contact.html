@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-center mb-4">📞 Contact Us</h2>
+
+  <div class="row">
+    <!-- Left Section -->
+    <div class="col-md-6">
+      <h5>🧠 Project Details</h5>
+      <p><strong>Title:</strong> Pancreatic Cancer Detection using Image Processing and AI</p>
+      <p><strong>Department:</strong> AIML, City Engineering College</p>
+      <p><strong>Guide:</strong> Asst. Prof. Rajashree</p>
+
+      <h5 class="mt-4">👨‍💻 Project Team</h5>
+      <ul>
+        <li>Vishnu B — Project Lead / Full Stack Developer</li>
+        <li>Keerthan S — ML Engineer</li>
+        <li>Ujwal D — Data Analyst</li>
+        <li>Mahesh Maruti Udoji — Research & Documentation</li>
+      </ul>
+
+      <h5 class="mt-4">📬 Contact Info</h5>
+      <p><strong>Email:</strong> yourmedicalreport@gmail.com</p>
+      <p><strong>Address:</strong> City Engineering College, Kanakapura Road, Bengaluru</p>
+    </div>
+
+    <!-- Right Section (Form) -->
+    <div class="col-md-6">
+      <h5>💌 Send us a Message</h5>
+      <form method="POST" action="/contact">
+        <div class="mb-3">
+          <input type="text" class="form-control" name="name" placeholder="Your Name" required>
+        </div>
+        <div class="mb-3">
+          <input type="email" class="form-control" name="email" placeholder="Your Email" required>
+        </div>
+        <div class="mb-3">
+          <input type="text" class="form-control" name="subject" placeholder="Subject" required>
+        </div>
+        <div class="mb-3">
+          <textarea class="form-control" name="message" rows="4" placeholder="Your Message..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-success w-100">Send Message</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

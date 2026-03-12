@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pancreatic Cancer Detection</title>
+
+    <!-- Bootstrap Dark Theme -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">🧠 PancreScan</a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+
+                    {% if user_id %}
+                        <li class="nav-item">
+                            <span class="nav-link text-white">👋 Hello, {{ user_name }}</span>
+                        </li>
+
+                        <li class="nav-item"><a href="{{ url_for('dashboard') }}" class="nav-link">🧬 Dashboard</a></li>
+                        <li class="nav-item"><a href="{{ url_for('process') }}" class="nav-link">🕵️ Start Detection</a></li>
+                        <li class="nav-item"><a href="{{ url_for('contact') }}" class="nav-link">📞 Contact Us</a></li>
+
+                        {% if user_name == "Vishnu B" %}
+                        <li class="nav-item"><a href="{{ url_for('admin_panel') }}" class="nav-link text-warning fw-bold">⚙️ Admin Panel</a></li>
+                        {% endif %}
+
+                        <li class="nav-item"><a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm ms-3">Logout</a></li>
+
+                    {% else %}
+
+                        <li class="nav-item"><a href="{{ url_for('doctor_dashboard') }}" class="btn btn-outline-primary btn-sm me-3">Doctor Dashboard</a></li>
+                        <li class="nav-item"><a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm me-2">User Login</a></li>
+                        <li class="nav-item"><a href="{{ url_for('signup') }}" class="btn btn-outline-success btn-sm">User Signup</a></li>
+
+                    {% endif %}
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Page Content -->
+    <main class="flex-grow-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer text-light py-4 bg-dark mt-5">
+        <div class="container text-center">
+            <p class="mb-0">© 2025 City Engineering College | Dept. of AIML</p>
+            <p class="text-muted small">Developed by Vishnu B & Team</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+<!-- ================================ -->
+<!-- 💬 Updated Chatbot System (Fix) -->
+<!-- ================================ -->
+
+<div id="chatbot-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
+    
+    <!-- Floating Button -->
+    <button id="chatbot-toggle" class="btn btn-info rounded-circle p-3 shadow-lg" style="font-size: 20px;">
+        💬
+    </button>
+
+    <!-- Chatbot Box -->
+    <div id="chatbot-box"
+         class="shadow-lg rounded"
+         style="width: 330px; height: 420px; background: #111; color: #fff;
+                position: absolute; bottom: 70px; right: 20px; display: none;
+                border: 1px solid #0dcaf0;">
+        
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center p-2"
+             style="background: #0dcaf0; color: black; border-top-left-radius: 5px; border-top-right-radius: 5px;">
+            <strong>🤖 AI Health Assistant</strong>
+            <button id="close-chat" class="btn-close btn-close-dark"></button>
+        </div>
+
+        <!-- Chat messages -->
+        <div id="chat-messages"
+             style="height: 290px; overflow-y: auto; padding: 10px; background: #1c1c1c;">
+        </div>
+
+        <!-- Chat Input -->
+        <div style="padding: 10px; background: #111;">
+            <div class="d-flex">
+                <textarea id="chat-input"
+                          class="form-control"
+                          rows="2"
+                          placeholder="Type your message..."
+                          style="background: #222; color: white; border: 1px solid #555;"></textarea>
+
+                <button class="btn btn-success ms-2" onclick="sendUserMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chat Bubble CSS -->
+<style>
+/* chat bubble styling - prevents mid-word forced breaks */
+.chat-bubble {
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 12px;
+  max-width: 95%;
+  white-space: pre-wrap;        /* preserve user line breaks */
+  word-break: normal;           /* do not break words arbitrarily */
+  overflow-wrap: break-word;    /* break long words only if needed */
+  line-height: 1.4;
+  box-shadow: rgba(0,0,0,0.25) 0 1px 2px;
+}
+
+/* user bubble (right) */
+.chat-bubble.user {
+  background: #0d6efd;
+  color: white;
+  float: right;
+  clear: both;
+  margin-bottom: 8px;
+  text-align: right;
+}
+
+/* bot bubble (left) */
+.chat-bubble.bot {
+  background: #2f2f2f;
+  color: white;
+  float: left;
+  clear: both;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+/* small helper to contain each message row */
+.chat-row { overflow: hidden; margin-bottom: 6px; }
+</style>
+
+<script>
+/* Toggle and close handlers (keep as-is) */
+document.getElementById('chatbot-toggle').onclick = () => {
+  document.getElementById('chatbot-box').style.display = "block";
+};
+document.getElementById('close-chat').onclick = () => {
+  document.getElementById('chatbot-box').style.display = "none";
+};
+
+/* Safe function to insert a chat bubble.
+   Uses textContent to avoid HTML injection and preserve words. */
+function appendMessage(text, who='bot') {
+  const msgBox = document.getElementById('chat-messages');
+
+  const row = document.createElement('div');
+  row.className = 'chat-row';
+
+  const span = document.createElement('span');
+  span.className = 'chat-bubble ' + (who === 'user' ? 'user' : 'bot');
+
+  // Use textContent to avoid any injected HTML, but allow line breaks
+  // convert '\n' to actual newlines (pre-wrap handles them)
+  span.textContent = text;
+
+  row.appendChild(span);
+  msgBox.appendChild(row);
+
+  // scroll to bottom
+  msgBox.scrollTop = msgBox.scrollHeight;
+}
+
+/* Send message to backend and display both sides */
+async function sendUserMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  // append user message
+  appendMessage(text, 'user');
+  input.value = '';
+
+  try {
+    const res = await fetch('/chatbot', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message: text})
+    });
+    const data = await res.json();
+    const reply = data.reply || "⚠️ No response";
+    appendMessage(reply, 'bot');
+  } catch (err) {
+    appendMessage("⚠️ Chatbot error. Please try again.", 'bot');
+    console.error("Chat error:", err);
+  }
+}
+
+/* If your form uses submit, intercept it and call sendUserMessage */
+const chatForm = document.getElementById('chat-form');
+if (chatForm) {
+  chatForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    sendUserMessage();
+  });
+}
+</script> 
+
+</body>
+</html>

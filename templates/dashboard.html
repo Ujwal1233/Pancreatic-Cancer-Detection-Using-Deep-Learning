@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-center mb-4">🧬 {{ user.name }}'s Dashboard</h2>
+
+  {% if scans %}
+  <!-- 🧾 Scrollable Results Section -->
+  <div class="table-responsive shadow-lg rounded-3 scrollable-results">
+    <table class="table table-dark table-striped table-bordered align-middle mb-0">
+      <thead class="table-primary text-center">
+        <tr>
+          <th>#</th>
+          <th>Date </th>
+          <th>Cancer Type</th>
+          <th>Stage</th>
+          <th>Confidence</th>
+          <th>Status</th>
+          <th>Report</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for scan in scans %}
+        <tr class="text-center">
+          <td>{{ loop.index }}</td>
+          <td>{{ to_ist(scan.date).strftime('%Y-%m-%d %H:%M:%S') }}</td>
+          <td>{{ scan.cancer_type }}</td>
+          <td>{{ scan.cancer_stage }}</td>
+          <td>{{ (scan.confidence * 100) | round(2) }}%</td>
+          <td>
+            {% if scan.cancer_detected %}
+              <span class="badge bg-danger">Cancer Detected</span>
+            {% else %}
+              <span class="badge bg-success">Healthy</span>
+            {% endif %}
+          </td>
+
+          <!-- ✅ Corrected Download Button -->
+          <td>
+            <form action="{{ url_for('download_basic_report') }}" method="POST" class="d-inline">
+              <input type="hidden" name="scan_id" value="{{ scan.id }}">
+              <button class="btn btn-outline-info btn-sm">📄 Download</button>
+            </form>
+          </td>
+
+        </tr>
+        {% endfor %}
+        </tbody>
+
+
+    </table>
+  </div>
+  {% else %}
+    <p class="text-center text-muted">No scans yet. Upload your first image to get started!</p>
+  {% endif %}
+
+  <div class="text-center mt-4">
+    <a href="{{ url_for('process') }}" class="btn btn-primary btn-lg">🔍 Start New Scan</a>
+  </div>
+</div>
+{% endblock %}

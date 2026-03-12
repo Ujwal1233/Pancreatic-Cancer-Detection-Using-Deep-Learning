@@ -1,0 +1,298 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1 class="mb-4 text-center">Cancer Detection Process</h1>
+
+  <div class="row">
+    <!-- Upload Section -->
+    <div class="col-md-6">
+      <div class="card mb-4 shadow">
+        <div class="card-body">
+          <h5 class="card-title">Upload Medical Scan</h5>
+          <form id="upload-form">
+            <div class="mb-3">
+              <label for="image-input" class="form-label">Choose CT or MRI scan image</label>
+              <input type="file" class="form-control" id="image-input" accept="image/*" required>
+            </div>
+            <div class="preview-container mb-3">
+              <img id="preview-image" class="preview-image d-none" alt="Preview">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Analyze Image</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Section -->
+    <div class="col-md-6">
+      <div class="card mb-4 shadow">
+        <div class="card-body">
+          <h5 class="card-title">About the Process</h5>
+          <p class="card-text">
+            Once you upload a CT or MRI scan, our system will automatically process the image using
+            advanced image processing and AI algorithms. The analysis includes preprocessing,
+            segmentation, and classification to identify possible cancerous regions and provide a
+            confidence score.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div id="loading-spinner" class="text-center my-4 d-none">
+    <div class="spinner-border text-primary loading-spinner" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Processing image...</p>
+  </div>
+
+  <!-- Result Section -->
+  <div id="result-section" class="d-none">
+    <h2 class="mb-4 text-center">Analysis Results</h2>
+
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="card text-center shadow">
+          <div class="card-body">
+            <h5 class="card-title">Cancer Type</h5>
+            <p id="cancer-type" class="card-text fs-4 fw-semibold"></p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center shadow">
+          <div class="card-body">
+            <h5 class="card-title">Stage</h5>
+            <p id="cancer-stage" class="card-text fs-4 fw-semibold"></p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center shadow">
+          <div class="card-body">
+            <h5 class="card-title">Confidence</h5>
+            <p id="confidence" class="card-text fs-4 fw-semibold"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="mb-3">Processing Steps</h3>
+    <div id="processing-steps" class="row"></div>
+
+    <!-- Assistance Section -->
+    <div class="text-center mt-5">
+      <h5>Need Medical Assistance or Guidance?</h5>
+      <p>
+        Click below to find nearby hospitals, view a diet plan, explore exercises, or download your
+        health report.
+      </p>
+
+      <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <a href="https://www.google.com/maps/search/cancer+hospitals+near+me" class="btn btn-outline-primary btn-lg shadow"
+          target="_blank">🏥 Find Nearby Hospitals</a>
+
+        <button class="btn btn-outline-success btn-lg shadow" data-bs-toggle="modal"
+          data-bs-target="#dietPlanModal">🥗 View Diet Plan</button>
+
+        <button class="btn btn-outline-warning btn-lg shadow" data-bs-toggle="modal"
+          data-bs-target="#exerciseModal">🏋️ Exercises</button>
+
+        <button id="download-report" class="btn btn-outline-info btn-lg shadow">📄 Download Health Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Diet Plan Modal -->
+<div class="modal fade" id="dietPlanModal" tabindex="-1" aria-labelledby="dietPlanLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" id="dietPlanModalContent">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="dietPlanLabel">Dietitian-Recommended Diet Plan for Pancreatic Health</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body" style="color:#ffffff;">
+
+        <p class="fw-semibold">Here’s a carefully recommended diet plan to support pancreatic function and recovery:</p>
+
+        <h6 class="text-success mt-3">✅ Foods to Include:</h6>
+        <ul>
+          <li>Fresh fruits like apples, papaya, berries, and oranges.</li>
+          <li>Steamed vegetables such as spinach, carrots, broccoli, and beans.</li>
+          <li>Lean proteins — boiled chicken, fish, tofu, lentils, and beans.</li>
+          <li>Whole grains — brown rice, oats, quinoa, and whole wheat bread.</li>
+          <li>Healthy fats — avocado, olive oil, flaxseeds, and almonds (in moderation).</li>
+          <li>Plenty of water and herbal teas like green tea or chamomile tea.</li>
+        </ul>
+
+        <h6 class="text-danger mt-3">🚫 Foods to Avoid:</h6>
+        <ul>
+          <li>Fried and processed foods</li>
+          <li>High-fat dairy products</li>
+          <li>Red meat and processed meats</li>
+          <li>Sugary drinks and alcohol</li>
+          <li>Spicy and oily dishes</li>
+        </ul>
+
+        <h6 class="text-primary mt-3">🕐 Meal Timing Tips:</h6>
+        <ul>
+          <li>Eat small meals 5–6 times a day.</li>
+          <li>Maintain 2–3 hours gap before sleep.</li>
+          <li>Stay hydrated throughout the day.</li>
+        </ul>
+
+        <p class="mt-3">
+          💬 <strong style="color:#00ff99;">Note:</strong> Consult a nutritionist for professional guidance.
+        </p>
+
+        <!-- Button to load Custom Diet -->
+        <div class="text-center mt-4">
+          <button class="btn btn-outline-info" id="load-custom-diet" data-bs-toggle="modal" data-bs-target="#customDietModal">
+            🍽️ View Your Customized Diet Plan
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 🔥 Custom Diet Modal (MUST be outside) -->
+<div class="modal fade" id="customDietModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title">🍽️ Personalized Diet Plan </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-header  text-white">
+        <h5 class="modal-title">Note : This is a customised diet plan only for you</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body" id="custom-diet-body">
+        <p class="text-center">⏳ Loading your personalised diet...</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- Exercise Modal -->
+<div class="modal fade" id="exerciseModal" tabindex="-1" aria-labelledby="exerciseModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" id="exerciseModalContent">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="exerciseModalLabel">Recommended Exercises for Pancreatic Health</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body" style="color:#fff;">
+        <p class="fw-semibold">Regular activity supports pancreatic function and digestion.</p>
+
+        <h6 class="text-warning mt-3">🏃‍♂️ Aerobic Exercises:</h6>
+        <ul>
+          <li>30 minutes brisk walking daily.</li>
+          <li>Light jogging or cycling.</li>
+          <li>Swimming for full-body fitness.</li>
+          <li>Yoga breathing exercises (Pranayama).</li>
+        </ul>
+
+        <h6 class="text-warning mt-3">🧘 Yoga and Stretching:</h6>
+        <ul>
+          <li>Bhujangasana (Cobra Pose)</li>
+          <li>Dhanurasana (Bow Pose)</li>
+          <li>Ardha Matsyendrasana (Twist)</li>
+          <li>Vajrasana (Post-meal digestion)</li>
+        </ul>
+
+        <h6 class="text-warning mt-3">🏋️‍♀️ Strength Training:</h6>
+        <ul>
+          <li>Resistance bands or light dumbbells.</li>
+          <li>Posture-focused routines.</li>
+          <li>Supervised training if recovering.</li>
+        </ul>
+
+        <div class="text-center mt-4">
+          <button class="btn btn-outline-info" id="load-custom-exercise" data-bs-toggle="modal" data-bs-target="#customExerciseModal">
+            🏋️ View Your Customized Exercise Plan
+          </button>
+      </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 🔥 Custom Exercise Modal -->
+<div class="modal fade" id="customExerciseModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title">🏋️ Personalized Exercise Plan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body" id="custom-exercise-body">
+        <p class="text-center">⏳ Loading your personalised exercises...</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- JS: Load Custom Diet -->
+<script>
+document.getElementById("load-custom-diet").addEventListener("click", async () => {
+  const body = document.getElementById("custom-diet-body");
+  body.innerHTML = "<p class='text-center'>⏳ Loading...</p>";
+
+  try {
+    const res = await fetch("/custom_diet");
+    const data = await res.json();
+
+    let html = "<ul>";
+    data.diet.forEach(item => {
+      html += `<li>${item}</li>`;
+    });
+    html += "</ul>";
+
+    body.innerHTML = html;
+
+  } catch (err) {
+    body.innerHTML = "<p class='text-danger'>⚠️ Failed to load diet plan.</p>";
+  }
+});
+</script>
+
+<script>
+document.getElementById("load-custom-exercise").addEventListener("click", async () => {
+  const body = document.getElementById("custom-exercise-body");
+  body.innerHTML = "<p class='text-center'>⏳ Loading...</p>";
+
+  try {
+    const res = await fetch("/custom_exercise");
+    const data = await res.json();
+
+    let html = "<ul>";
+    data.exercises.forEach(item => {
+      html += `<li>${item}</li>`;
+    });
+    html += "</ul>";
+
+    body.innerHTML = html;
+
+  } catch (err) {
+    body.innerHTML = "<p class='text-danger'>⚠️ Failed to load exercise plan.</p>";
+  }
+});
+</script>
+
+
+{% endblock %}

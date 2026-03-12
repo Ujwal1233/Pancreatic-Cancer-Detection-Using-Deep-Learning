@@ -1,0 +1,510 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-5">
+  <h1 class="text-center mb-4">👑 Admin Dashboard</h1>
+  <h2 class="text-center mb-4">👥User Details</h2>
+  <!-- User Table -->
+  <div class="table-responsive shadow-lg rounded-3">
+    <table class="table table-dark table-striped table-bordered align-middle">
+      <thead class="table-success text-center">
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Gender</th>
+          <th>Age</th>
+          <th>Contact</th>
+          <th>Total Scans</th>
+          <th>Cancer Detected</th>
+          <th>No Cancer</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users_json %}
+        <tr class="text-center">
+          <td>{{ user.id }}</td>
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.gender }}</td>
+          <td>{{ user.age }}</td>
+          <td>{{ user.contact }}</td>
+          <td>{{ user.total_scans }}</td>
+          <td class="text-danger fw-bold">{{ user.cancer_detected }}</td>
+          <td class="text-success fw-bold">{{ user.no_cancer }}</td>
+          
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <h2 class="mt-5 text-center mb-4">⚕️ Doctor Details</h2>
+  <table class="table table-bordered table-dark mt-3">
+      <thead class="table-primary text-dark">
+          <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Contact</th>
+              <th>Specialization</th>
+              <th>Medical ID</th>
+              <th>ID Proof</th>
+              <th>Status</th>
+              <th>Toggle</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for doctor in doctors %}
+          <tr>
+              <td>{{ doctor.id }}</td>
+              <td>{{ doctor.name }}</td>
+              <td>{{ doctor.email }}</td>
+              <td>{{ doctor.contact }}</td>
+              <td>{{ doctor.specialization }}</td>
+              <td>{{ doctor.medical_id }}</td>
+
+              <td>
+                  <a href="{{ url_for('static', filename=doctor.id_proof_path) }}"
+                    target="_blank"
+                    class="btn btn-info btn-sm">View</a>
+              </td>
+
+              <td>
+                  {% if doctor.status == "APPROVED" %}
+                      <span class="badge bg-success">Approved</span><br>
+
+                  {% elif doctor.status == "REJECTED" %}
+                      <span class="badge bg-danger">Rejected</span><br>
+
+                  {% else %}
+                      <span class="badge bg-warning">Pending</span><br>
+                      <a href="/approve_doctor/{{ doctor.id }}" class="btn btn-success btn-sm mt-1">Approve</a>
+                      <a href="/reject_doctor/{{ doctor.id }}" class="btn btn-danger btn-sm mt-1">Reject</a>
+                  {% endif %}
+              </td>
+              <td>
+                <a href="/approve_doctor/{{ doctor.id }}" class="btn btn-success btn-sm">Approve</a>
+                <a href="/reject_doctor/{{ doctor.id }}" class="btn btn-danger btn-sm">Reject</a>
+              </td>
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+
+
+  <!-- DOCTOR APPROVAL SECTION -->
+  <div class="container mt-5">
+    <h3 class="text-center text-warning mb-3">🩺 Pending Doctor Approvals</h3>
+
+    {% if pending_doctors %}
+    <div class="table-responsive shadow-lg rounded-3 mb-5">
+      <table class="table table-dark table-striped table-bordered text-center">
+        <thead class="table-warning">
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Contact</th>
+            <th>Specialization</th>
+            <th>Medical ID</th>
+            <th>ID Proof</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for doctor in pending_doctors %}
+          <tr>
+            <td>{{ doctor.name }}</td>
+            <td>{{ doctor.email }}</td>
+            <td>{{ doctor.contact }}</td>
+            <td>{{ doctor.specialization }}</td>
+            <td>{{ doctor.medical_id }}</td>
+            <td>
+              <a href="{{ url_for('static', filename=doctor.id_proof_path) }}"
+                    target="_blank"
+                    class="btn btn-info btn-sm">View</a>
+              </td>
+            </td>
+            <td>
+              <a href="/approve_doctor/{{ doctor.id }}" class="btn btn-success btn-sm">Approve</a>
+              <a href="/reject_doctor/{{ doctor.id }}" class="btn btn-danger btn-sm">Reject</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <p class="text-muted text-center">No pending doctor registrations.</p>
+    {% endif %}
+  </div>
+  <!-- 🌍 Overall Overview -->
+  <div class="text-center mt-5">
+    <h4> 👨🏽‍⚕️ Doctors Overview</h4>
+    <div class="row mt-4">
+      <div class="col-md-4 mt-5">
+        <div class="card bg-dark shadow-lg border-success">
+          <div class="card-body">
+            <h5 class="text-success">🩺 Doctor Approval Status</h5>
+            <canvas id="doctorStatusChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-8  mt-5">
+        <div class="card bg-dark shadow-lg border-info">
+          <div class="card-body">
+            <h5 class="text-info">👨‍⚕️ Doctors by Specialization</h5>
+            <canvas id="doctorSpecializationChart" height="138"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-12 mt-5">
+        <div class="card bg-dark shadow-lg border-primary">
+          <div class="card-body">
+            <h5 class="text-primary">📈 Doctor Registration Trend</h5>
+          <div style="height: 350px;">
+            <canvas id="doctorRegistrationChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+     <div class="text-center mt-5">
+    <h4>👨‍👨 Users Overview</h4>
+      <div class="row mt-5">
+      <!-- Gender Distribution -->
+      <div class="col-md-4 mt-5">
+        <div class="card bg-dark shadow-lg border-success">
+          <div class="card-body">
+            <h5 class="text-success">🧍 Gender Distribution</h5>
+            <canvas id="genderChart" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Age Group Classification (Donut Chart) -->
+      <div class="col-md-4 mt-5">
+        <div class="card bg-dark shadow-lg border-warning">
+          <div class="card-body">
+            <h5 class="text-warning">🎂 Age Group Classification</h5>
+            <canvas id="ageGroupDonutChart" height="300"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Scans per Age Group -->
+      <div class="col-md-4 mt-5">
+        <div class="card bg-dark shadow-lg border-info">
+          <div class="card-body">
+            <h5 class="text-info">📈 Total Scans per Age Group</h5>
+            <canvas id="scansByAgeChart" height="300"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cancer vs Non-Cancer Cases -->
+      <div class="col-md-4 mt-5">
+        <div class="card bg-dark shadow-lg border-danger">
+          <div class="card-body">
+            <h5 class="text-danger">🧬 Cancer vs Non-Cancer Cases</h5>
+            <canvas id="cancerPieChart" height="250"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Average Confidence vs Age Group -->
+      <div class="col-md-8 mt-5">
+        <div class="card bg-dark shadow-lg border-primary">
+          <div class="card-body">
+            <h5 class="text-primary">🧠 Average Confidence vs Age Group</h5>
+            <canvas id="confidenceAgeChart" height="138"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 📊 Scan Statistics Overview -->
+  <div class="text-center mt-5">
+    <h4>📊 Scan Statistics Overview</h4>
+    <canvas id="scanChart" height="120"></canvas>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const users = {{ users_json | tojson }};
+
+const maleCount = {{ male_count }};
+const femaleCount = {{ female_count }};
+const ageGroups = {{ age_groups | tojson }};
+
+// ======================
+// 1️⃣ User Scan Overview
+// ======================
+const ctx = document.getElementById('scanChart').getContext('2d');
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: users.map(u => u.name),
+    datasets: [
+      { label: 'Cancer Detected', data: users.map(u => u.cancer_detected), backgroundColor: 'rgba(255, 99, 132, 0.8)' },
+      { label: 'No Cancer', data: users.map(u => u.no_cancer), backgroundColor: 'rgba(75, 192, 192, 0.8)' },
+      { label: 'Total Scans', data: users.map(u => u.total_scans), backgroundColor: 'rgba(255, 206, 86, 0.8)' }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom' },
+      title: { display: true, text: 'User Scan Statistics', font: { size: 16 } }
+    },
+    scales: { y: { beginAtZero: true } }
+  }
+});
+
+// ======================
+// 2️⃣ Gender Distribution
+// ======================
+new Chart(document.getElementById('genderChart').getContext('2d'), {
+  type: 'pie',
+  data: {
+    labels: ['Male', 'Female'],
+    datasets: [{
+      data: [maleCount, femaleCount],
+      backgroundColor: ['#36A2EB', '#FF6384'],
+    }]
+  },
+  options: {
+    plugins: {
+      title: { display: true, text: 'Gender Ratio', color: '#fff' },
+      tooltip: {
+        callbacks: {
+          label: (context) => `${context.label}: ${context.raw} (${((context.raw / (maleCount + femaleCount)) * 100).toFixed(1)}%)`
+        }
+      }
+    }
+  }
+});
+
+// ======================
+// 3️⃣ Age Group Donut Chart
+// ======================
+const ageGroupDonutCtx = document.getElementById('ageGroupDonutChart').getContext('2d');
+new Chart(ageGroupDonutCtx, {
+  type: 'doughnut',
+  data: {
+    labels: Object.keys(ageGroups),
+    datasets: [{
+      data: Object.values(ageGroups),
+      backgroundColor: ['#FFCD56', '#4BC0C0', '#9966FF', '#FF9F40'],
+      borderColor: '#222',
+      borderWidth: 2,
+      hoverOffset: 15
+    }]
+  },
+  options: {
+    cutout: '65%',
+    plugins: {
+      title: {
+        display: true,
+        text: 'Age Group Distribution',
+        color: '#fff',
+        font: { size: 16 }
+      },
+      legend: {
+        position: 'bottom',
+        labels: { color: '#fff', font: { size: 12 } }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+            const percentage = ((context.raw / total) * 100).toFixed(1);
+            return `${context.label}: ${context.raw} users (${percentage}%)`;
+          }
+        }
+      }
+    }
+  }
+});
+
+// ======================
+// 4️⃣ Scans per Age Group
+// ======================
+const scansCtx = document.getElementById('scansByAgeChart').getContext('2d');
+const scansByAge = { '20-30': 0, '30-40': 0, '40-50': 0, '50+': 0 };
+
+users.forEach(u => {
+  if (u.age >= 20 && u.age < 30) scansByAge['20-30'] += u.total_scans;
+  else if (u.age >= 30 && u.age < 40) scansByAge['30-40'] += u.total_scans;
+  else if (u.age >= 40 && u.age < 50) scansByAge['40-50'] += u.total_scans;
+  else scansByAge['50+'] += u.total_scans;
+});
+
+new Chart(scansCtx, {
+  type: 'bar',
+  data: {
+    labels: Object.keys(scansByAge),
+    datasets: [{
+      label: 'Total Scans',
+      data: Object.values(scansByAge),
+      backgroundColor: '#36A2EB'
+    }]
+  },
+  options: {
+    plugins: {
+      title: { display: true, text: 'Total Scans by Age Group', color: '#fff' },
+      legend: { display: false }
+    },
+    scales: {
+      y: { beginAtZero: true, ticks: { color: '#fff' } },
+      x: { ticks: { color: '#fff' } }
+    }
+  }
+});
+
+// ======================
+// 5️⃣ Cancer vs Non-Cancer Pie Chart
+// ======================
+new Chart(document.getElementById('cancerPieChart').getContext('2d'), {
+  type: 'pie',
+  data: {
+    labels: ['Cancer Detected', 'No Cancer'],
+    datasets: [{
+      data: [{{ cancer_cases }}, {{ non_cancer_cases }}],
+      backgroundColor: ['#FF4C4C', '#4CAF50']
+    }]
+  },
+  options: {
+    plugins: {
+      title: {
+        display: true,
+        text: 'Cancer vs Non-Cancer Cases',
+        color: '#fff'
+      },
+      legend: {
+        labels: { color: '#fff' }
+      }
+    }
+  }
+});
+
+// ======================
+// 6️⃣ Average Confidence vs Age Group
+// ======================
+const confidenceCtx = document.getElementById('confidenceAgeChart').getContext('2d');
+const avgConfidence = {{ avg_confidence_by_age | tojson }};
+
+new Chart(confidenceCtx, {
+  type: 'line',
+  data: {
+    labels: Object.keys(avgConfidence),
+    datasets: [{
+      label: 'Average Confidence',
+      data: Object.values(avgConfidence),
+      borderColor: '#FFCD56',
+      backgroundColor: 'rgba(255, 205, 86, 0.3)',
+      tension: 0.4,
+      fill: true,
+      pointRadius: 5,
+      pointBackgroundColor: '#FFD700'
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Model Confidence Across Age Groups',
+        color: '#fff',
+        font: { size: 16 }
+      },
+      legend: { labels: { color: '#fff' } }
+    },
+    scales: {
+      x: { ticks: { color: '#fff' } },
+      y: {
+        beginAtZero: true,
+        max: 1.0,
+        ticks: {
+          color: '#fff',
+          stepSize: 0.1,
+          callback: value => value.toFixed(1)
+        }
+      }
+    }
+  }
+});
+
+new Chart(document.getElementById("doctorStatusChart"), {
+  type: "pie",
+  data: {
+    labels: ["Approved", "Pending", "Rejected"],
+    datasets: [{
+      data: [
+        {{ approved_doctors }},
+        {{ pending_count }},
+        {{ rejected_doctors }}
+      ],
+      backgroundColor: ["#28a745", "#ffc107", "#dc3545"]
+    }]
+  }
+});
+
+new Chart(document.getElementById("doctorSpecializationChart"), {
+  type: "bar",
+  data: {
+    labels: {{ doctor_specialization_counts.keys() | list | tojson }},
+    datasets: [{
+      label: "Doctors",
+      data: {{ doctor_specialization_counts.values() | list | tojson }},
+      backgroundColor: "#17a2b8"
+    }]
+  },
+  options: {
+    scales: { y: { beginAtZero: true } }
+  }
+});
+
+new Chart(document.getElementById("doctorRegistrationChart"), {
+  type: "line",
+  data: {
+    labels: {{ doctor_registration_trend.keys() | list | tojson }},
+    datasets: [{
+      label: "Registrations",
+      data: {{ doctor_registration_trend.values() | list | tojson }},
+      borderColor: "#0d6efd",
+      backgroundColor: "rgba(13,110,253,0.25)",
+      fill: true,
+      tension: 0.4,
+      pointRadius: 4
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,   // 🔥 KEY LINE
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { color: "#aaa" }
+      },
+      x: {
+        ticks: { color: "#aaa" }
+      }
+    },
+    plugins: {
+      legend: {
+        labels: { color: "#aaa" }
+      }
+    }
+  }
+});
+
+
+
+
+
+</script>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="row">
+
+        <!-- LEFT SIDE COLUMN -->
+        <div class="col-md-6">
+            <h2 class="text-center mt-2 mb-3">🙍🏻‍♂️ User Details </h2>
+            <hr>
+
+            <p><strong>Name:</strong> {{ user.name }}</p>
+            <p><strong>Age:</strong> {{ user.age }}</p>
+            <p><strong>Contact:</strong> {{ user.contact }}</p>
+            <p><strong>Mail:</strong> {{ user.email }}</p>
+            <p><strong>Total Scans:</strong> {{ total_scans }}</p>
+            <p><strong>Cancer Detected:</strong> {{ cancer_detected }} times</p>
+
+            {% if last_scan %}
+                <p><strong>Last Cancer Stage:</strong> {{ last_scan.cancer_stage }}</p>
+                <p><strong>Last Confidence:</strong> {{ last_scan.confidence * 100 | round(2) }}%</p>
+            {% else %}
+                <p>No scans available for this user.</p>
+            {% endif %}
+
+            <form action="/doctor/user/{{ user.id }}/download_summary" method="POST">
+                <button class="btn btn-primary mt-3">📄 Download User Summary PDF</button>
+            </form>
+
+            <a href="/doctor_dashboard" class="btn btn-secondary mt-3">Back to Dashboard</a>
+        </div>
+
+        <!-- RIGHT SIDE COLUMN -->
+        <div class="col-md-6">
+
+            <h2 class="text-center mt-2 mb-3">📞 Contact Patient</h2>
+            <hr>
+
+            <h4 class="mb-2">📧 Mail Patient</h4>
+
+            <form action="/doctor/mail_patient/{{ user.id }}" method="POST">
+                <textarea name="message"
+                          class="form-control"
+                          rows="8"
+                          required
+                          placeholder="Type your message to the patient..."></textarea>
+
+                <button class="btn btn-success mt-2 w-100">Send Mail</button>
+            </form>
+
+            <h4 class="mt-4 mb-2">💬 WhatsApp Message</h4>
+
+            <form method="GET" action="" onsubmit="sendWhatsAppMessage(event)">
+                <textarea id="whatsappMessage"
+                        class="form-control"
+                        rows="4"
+                        required
+                        placeholder="Type WhatsApp message to the patient..."></textarea>
+
+                <button class="btn btn-success mt-2 w-100">Send on WhatsApp</button>
+            </form>
+
+        </div>
+
+    </div>
+</div>
+<script>
+function sendWhatsAppMessage(event) {
+    event.preventDefault();
+
+    let msg = document.getElementById("whatsappMessage").value;
+    let phone = "{{ user.contact }}";
+
+    // Encode message for WhatsApp
+    let footer = `
+    —
+    This message was sent by your doctor, Dr. {{ session['doctor_name'] }}
+    Pancreatic Cancer Detection Website
+
+    Doctor Email: {{ session['doctor_email'] }}
+    Doctor Contact: {{ doctor.contact }}
+
+    For issues: yourmedicalreport@gmail.com
+    `;
+
+    let fullMsg = msg + "\n\n" + footer;
+    let encodedMsg = encodeURIComponent(fullMsg);
+
+    // Redirect to WhatsApp
+    let url = `https://wa.me/${phone}?text=${encodedMsg}`;
+    window.open(url, "_blank");
+}
+</script>
+
+{% endblock %}

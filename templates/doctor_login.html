@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container mt-5">
+  <h2 class="text-center mb-4">👨‍⚕️ Doctor Login</h2>
+
+  <div class="card bg-dark p-4 shadow-lg mx-auto" style="max-width: 450px; border-radius: 15px; color: #fff;">
+    
+    <!-- 🔔 FLASH MESSAGE ALERTS (ADDED) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <!-- END ALERTS -->
+
+    <form action="/doctor_login" method="POST">
+
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" required class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" required class="form-control">
+      </div>
+
+      <button class="btn btn-primary w-100 mt-2">Login</button>
+    </form>
+
+    <p class="text-center mt-3">
+      New doctor? <a href="/doctor_register" class="text-info">Register here</a>
+    </p>
+  </div>
+</div>
+
+{% endblock %}
